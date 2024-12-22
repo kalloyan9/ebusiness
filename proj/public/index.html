@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Business System</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .product, .category { margin-bottom: 15px; }
+        .category-list, .product-list { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>E-Business System for Organic Honey and Syrups</h1>
+    
+    <h2>Products</h2>
+    <div id="product-list" class="product-list"></div>
+    
+    <h2>Categories</h2>
+    <div id="category-list" class="category-list"></div>
+    
+    <h2>Add a Product</h2>
+    <form id="add-product-form">
+        <input type="text" id="product-name" placeholder="Product Name" required><br><br>
+        <input type="number" id="product-price" placeholder="Price" required><br><br>
+        <textarea id="product-description" placeholder="Description" required></textarea><br><br>
+        <select id="category-select" required></select><br><br>
+        <button type="submit">Add Product</button>
+    </form>
+
+    <script src="script.js"></script>
+</body>
+</html>
