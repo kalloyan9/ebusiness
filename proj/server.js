@@ -58,17 +58,34 @@ app.get('/products/category/:categoryId', (req, res) => {
     });
 });
 
-// User login
+// Login route
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const sql = 'SELECT id FROM users WHERE username = ? AND password = ?';
     db.query(sql, [username, password], (err, results) => {
         if (err) {
-            res.status(500).send('Error during login');
+            res.status(500).send('Database error');
         } else if (results.length === 0) {
-            res.status(401).json({ success: false, message: 'Invalid credentials' });
+            res.json({ success: false });
         } else {
             res.json({ success: true, userId: results[0].id });
+        }
+    });
+});
+
+// Register route
+app.post('/register', (req, res) => {
+    const { username, email, password } = req.body;
+    const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
+    db.query(sql, [username, email, password], (err) => {
+        if (err) {
+            if (err.code === 'ER_DUP_ENTRY') {
+                res.json({ success: false, message: 'Username or email already exists' });
+            } else {
+                res.status(500).send('Error registering user');
+            }
+        } else {
+            res.json({ success: true });
         }
     });
 });
