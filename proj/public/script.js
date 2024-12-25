@@ -1,24 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
     fetchProducts();
-    fetchCategories();
+    setupLoginForm();
 
-    const addProductForm = document.getElementById('add-product-form');
-    addProductForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const name = document.getElementById('product-name').value;
-        const price = document.getElementById('product-price').value;
-        const description = document.getElementById('product-description').value;
-        const category_id = document.getElementById('category-select').value;
-
-        if (name && price && description && category_id) {
-            const productData = { name, price, description, category_id };
-            addProduct(productData);
-        } else {
-            alert("Please fill all fields.");
-        }
-    });
+    document.getElementById('checkout-button').addEventListener('click', checkoutCart);
 });
+
+function setupLoginForm() {
+    const loginForm = document.getElementById('login-form');
+    loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        loginUser({ username, password });
+    });
+}
+
+function loginUser(credentials) {
+    fetch('http://localhost:3000/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Login successful!');
+            fetchCart(data.userId);
+        } else {
+            alert('Login failed. Please check your credentials.');
+        }
+    })
+    .catch(error => console.error('Error logging in:', error));
+}
 
 function fetchProducts() {
     fetch('http://localhost:3000/products')
@@ -29,41 +45,49 @@ function fetchProducts() {
             data.forEach(product => {
                 const productDiv = document.createElement('div');
                 productDiv.classList.add('product');
-                productDiv.innerHTML = `<strong>${product.name}</strong>: $${product.price}<br>${product.description}`;
+                productDiv.innerHTML = `
+                    <strong>${product.name}</strong>: $${product.price}<br>${product.description}
+                    <button onclick="addToCart(${product.id})">Add to Cart</button>
+                `;
                 productList.appendChild(productDiv);
             });
         })
         .catch(error => console.error('Error fetching products:', error));
 }
 
-function fetchCategories() {
-    fetch('http://localhost:3000/categories')
-        .then(response => response.json())
-        .then(data => {
-            const categorySelect = document.getElementById('category-select');
-            categorySelect.innerHTML = ''; // Clear existing options
-            data.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.id;
-                option.textContent = category.name;
-                categorySelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error fetching categories:', error));
+function addToCart(productId) {
+    fetch('http://localhost:3000/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        fetchCart(data.userId);
+    })
+    .catch(error => console.error('Error adding to cart:', error));
 }
 
-function addProduct(productData) {
-    fetch('http://localhost:3000/products', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-    })
-    .then(response => response.text())
-    .then(message => {
-        alert(message);
-        fetchProducts(); // Reload the product list after adding a new product
-    })
-    .catch(error => console.error('Error adding product:', error));
+function fetchCart(userId) {
+    fetch(`http://localhost:3000/cart/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            const cart = document.getElementById('cart');
+            cart.innerHTML = '';
+            data.items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('cart-item');
+                itemDiv.textContent = `${item.name} x ${item.quantity}`;
+                cart.appendChild(itemDiv);
+            });
+        })
+        .catch(error => console.error('Error fetching cart:', error));
+}
+
+function checkoutCart() {
+    fetch('http://localhost:3000/checkout', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => alert(data.message))
+        .catch(error => console.error('Error during checkout:', error));
 }
