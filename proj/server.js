@@ -58,6 +58,20 @@ app.get('/products/category/:categoryId', (req, res) => {
     });
 });
 
+// Add a product (POST)
+app.post('/products', (req, res) => {
+    const { name, price, description, category_id } = req.body;
+    const sql = 'INSERT INTO products (name, price, description, stock, category_id) VALUES (?, ?, ?, 0, ?)';
+    db.query(sql, [name, price, description, category_id], (err) => {
+        if (err) {
+            res.status(500).send('Error adding product');
+        } else {
+            res.json({ success: true, message: 'Product added successfully' });
+        }
+    });
+});
+
+
 // Login route
 app.post('/login', (req, res) => {
     const { username, password } = req.body;

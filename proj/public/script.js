@@ -50,33 +50,32 @@ function setupLoginForm() {
 function setupLogoutButton() {
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
+        console.log('Logout button found'); // Check if the button is found
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('userId');
             alert('Logged out successfully!');
-            window.location.href = 'login.html';
+            window.location.href = 'http://localhost:3000/login.html'; // Redirect to login page
         });
+    } else {
+        console.warn('Logout button not found');
     }
 }
+
 
 async function fetchCategories() {
     try {
         const response = await fetch('/categories');
         const categories = await response.json();
-        const categorySelect = document.getElementById('category-select');
-
-        if (categorySelect) {
-            categorySelect.innerHTML = categories
-                .map((category) => `<option value="${category.id}">${category.name}</option>`)
-                .join('');
-        } else {
-            console.warn('Category select element not found.');
-        }
+        const categoryList = document.getElementById('category-list');
+        categoryList.innerHTML = categories
+            .map(category => `<div>${category.name}</div>`)
+            .join('');
     } catch (error) {
         console.error('Error fetching categories:', error);
     }
 }
 
-function setupProductForm() {
+async function setupProductForm() {
     const productForm = document.getElementById('add-product-form');
     if (productForm) {
         productForm.addEventListener('submit', async (e) => {
@@ -93,14 +92,15 @@ function setupProductForm() {
                     body: JSON.stringify({ name, price, description, category_id: categoryId }),
                 });
 
-                if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
                     alert('Product added successfully!');
-                    setupProductDisplay(); // Refresh product display
                 } else {
-                    console.error('Error adding product:', await response.text());
+                    alert('Error adding product');
                 }
             } catch (error) {
                 console.error('Error adding product:', error);
+                alert('An error occurred while adding the product.');
             }
         });
     }
