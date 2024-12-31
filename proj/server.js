@@ -2,19 +2,16 @@ const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path'); // Import the 'path' module
+const path = require('path');
 
 const app = express();
 const port = 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public'))); // Add this line
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Database connection
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -31,9 +28,6 @@ db.connect((err) => {
     }
 });
 
-// Routes
-
-// Fetch all products
 app.get('/products', (req, res) => {
     const sql = 'SELECT * FROM products';
     db.query(sql, (err, results) => {
@@ -45,7 +39,6 @@ app.get('/products', (req, res) => {
     });
 });
 
-// Fetch products by category
 app.get('/products/category/:categoryId', (req, res) => {
     const { categoryId } = req.params;
     const sql = 'SELECT * FROM products WHERE category_id = ?';
@@ -58,7 +51,6 @@ app.get('/products/category/:categoryId', (req, res) => {
     });
 });
 
-// Add a product (POST)
 app.post('/products', (req, res) => {
     const { name, price, description, category_id } = req.body;
     const sql = 'INSERT INTO products (name, price, description, stock, category_id) VALUES (?, ?, ?, 0, ?)';
@@ -72,7 +64,6 @@ app.post('/products', (req, res) => {
 });
 
 
-// Login route
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const sql = 'SELECT id FROM users WHERE username = ? AND password = ?';
@@ -87,7 +78,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-// Register route
 app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
     const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
@@ -104,7 +94,6 @@ app.post('/register', (req, res) => {
     });
 });
 
-// Add to cart
 app.post('/cart', (req, res) => {
     const { userId, productId } = req.body;
     const cartQuery = 'SELECT id FROM carts WHERE user_id = ?';
@@ -129,7 +118,6 @@ app.post('/cart', (req, res) => {
     });
 });
 
-// Fetch cart
 app.get('/cart/:userId', (req, res) => {
     const { userId } = req.params;
     const sql = `
@@ -148,7 +136,6 @@ app.get('/cart/:userId', (req, res) => {
     });
 });
 
-// Checkout
 app.post('/checkout', (req, res) => {
     const { userId } = req.body;
     const fetchCartQuery = `
@@ -203,7 +190,6 @@ app.post('/checkout', (req, res) => {
     });
 });
 
-// Helper function to add an item to the cart
 function addCartItem(cartId, productId, res) {
     const sql = 'INSERT INTO cart_items (cart_id, product_id, quantity) VALUES (?, ?, 1)';
     db.query(sql, [cartId, productId], (err) => {
@@ -215,12 +201,10 @@ function addCartItem(cartId, productId, res) {
     });
 }
 
-// Root route
 app.get('/', (req, res) => {
     res.send('Welcome to the E-Business System API');
 });
 
-// Start server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });

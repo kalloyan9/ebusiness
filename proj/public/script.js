@@ -1,4 +1,3 @@
-// Wait for the DOM to load before executing
 document.addEventListener('DOMContentLoaded', () => {
     const userId = localStorage.getItem('userId');
     if (!userId) {
